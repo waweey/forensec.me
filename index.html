@@ -111,73 +111,7 @@
     <div id="postList"></div>
   </div>
 </section>
-<script src="https://cdn.quilljs.com/1.3.6/quill.js">  // Save to localStorage
-      const existingPosts = JSON.parse(localStorage.getItem('forumPosts') || '[]');
-      existingPosts.push({ id: postId, title, name, content, timestamp: new Date().toLocaleString(), replies: [] });
-      localStorage.setItem('forumPosts', JSON.stringify(existingPosts));
-
-      // Save replies per post later
-</script>
-<script>
-  const quill = new Quill('#editor', {
-    theme: 'snow',
-    placeholder: 'Write your thoughts here...',
-    modules: {
-      toolbar: [
-        ['bold', 'italic', 'underline'],
-        [{ 'list': 'ordered' }, { 'list': 'bullet' }],
-        ['emoji'],
-        ['clean']
-      ]
-    }
-  });
-
-  const postForm = document.getElementById('postForm');
-  const postList = document.getElementById('postList');
-
-  // Load from localStorage on page load
-  window.addEventListener('DOMContentLoaded', () => {
-    const stored = JSON.parse(localStorage.getItem('forumPosts') || '[]');
-    stored.forEach(post => {
-      const titleElement = document.createElement('div');
-      titleElement.style.padding = '0.5rem 1rem';
-      titleElement.style.border = '1px solid #aaa';
-      titleElement.style.marginBottom = '0.5rem';
-      titleElement.style.cursor = 'pointer';
-      titleElement.style.background = '#f9f9f9';
-      titleElement.textContent = post.title;
-      titleElement.setAttribute('data-target', post.id);
-
-      const contentElement = document.createElement('div');
-      contentElement.id = post.id;
-      contentElement.style.display = 'none';
-      contentElement.style.border = '1px solid #ccc';
-      contentElement.style.padding = '1rem';
-      contentElement.style.marginBottom = '1rem';
-      contentElement.innerHTML = `
-        <h4>${post.title} <span style='font-size:0.9rem; color:#555;'>(by ${post.name})</span></h4>
-        <div>${post.content}</div>
-        <div style='margin-top:1rem;'>
-          <label>Reply:</label>
-          <textarea rows='2' style='width:100%; margin-top:0.5rem;' class='reply-box'></textarea>
-          <button class='reply-btn' style='margin-top:0.5rem;'>Submit Reply</button>
-          <div class='replies' style='margin-top:1rem;'></div>
-        </div>`;
-
-      titleElement.addEventListener('click', () => {
-        const target = document.getElementById(post.id);
-        target.style.display = target.style.display === 'none' ? 'block' : 'none';
-      });
-
-      postList.prepend(contentElement);
-      postList.prepend(titleElement);
-
-      // Save to localStorage
-      const existingPosts = JSON.parse(localStorage.getItem('forumPosts') || '[]');
-      existingPosts.push(post);
-      localStorage.setItem('forumPosts', JSON.stringify(existingPosts));
-
-      // Send post to GitHub
+<script src="https://cdn.quilljs.com/1.3.6/quill.js">  // Send post to GitHub
       fetch('/.netlify/functions/save-post', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -186,6 +120,11 @@
       .then(res => res.json())
       .then(data => console.log('GitHub response:', data))
       .catch(err => console.error('GitHub error:', err));
+
+      // Save post to localStorage
+      const existingPosts = JSON.parse(localStorage.getItem('forumPosts') || '[]');
+      existingPosts.push(post);
+      localStorage.setItem('forumPosts', JSON.stringify(existingPosts));
 
       // Add reply logic
       contentElement.querySelector('.reply-btn').addEventListener('click', () => {
@@ -242,8 +181,7 @@
         <h4>${title} <span style='font-size:0.9rem; color:#555;'>(by ${name})</span></h4>
         <div>${content}</div>
         <div style='margin-top:1rem;'>
-          <label>Reply:</label>
-          <textarea rows='2' style='width:100%; margin-top:0.5rem;' class='reply-box'></textarea>
+          $1<input type="text" class="reply-name" placeholder="Your name" style="width:100%; margin-bottom:0.5rem; font-family:inherit; padding:0.5rem;"><div class="reply-editor" style="height:100px; margin-bottom:0.5rem;"></div>
           <button class='reply-btn' style='margin-top:0.5rem;'>Submit Reply</button>
           <div class='replies' style='margin-top:1rem;'></div>
         </div>`;
@@ -260,24 +198,39 @@
       quill.setContents([]);
 
       // Add reply logic
-      contentElement.querySelector('.reply-btn').addEventListener('click', function() {
-        const replyBox = contentElement.querySelector('.reply-box');
-        const replyContent = replyBox.value.trim();
-        const timestamp = new Date().toLocaleString();
-        const repliesContainer = contentElement.querySelector('.replies');
+      const replyEditor = contentElement.querySelector('.reply-editor');
+const replyNameInput = contentElement.querySelector('.reply-name');
+const quillReply = new Quill(replyEditor, {
+  theme: 'snow',
+  placeholder: 'Write your reply...',
+  modules: {
+    toolbar: [['bold', 'italic', 'underline'], [{ list: 'bullet' }], ['clean']]
+  }
+});
 
-        if (replyContent) {
-          const reply = document.createElement('div');
-          reply.style.marginTop = '0.5rem';
-          reply.style.padding = '0.5rem';
-          reply.style.background = '#f0f0f0';
-          reply.style.borderRadius = '4px';
-          reply.innerHTML = `<strong>${name || 'Anonymous'}:</strong> <span>${replyContent}</span><div style='font-size:0.8rem; color:#666;'>${timestamp}</div>`;
+contentElement.querySelector('.reply-btn').addEventListener('click', function() {
+  const replyContent = quillReply.root.innerHTML.trim();
+  const replyName = replyNameInput.value.trim();
+  const timestamp = new Date().toLocaleString();
+  const repliesContainer = contentElement.querySelector('.replies');
 
-          repliesContainer.appendChild(reply);
-          replyBox.value = '';
-        }
-      });
+  if (!replyName) {
+    alert('Reply name is required.');
+    return;
+  }
+  if (replyContent && replyContent !== '<p><br></p>') {
+    const reply = document.createElement('div');
+    reply.style.marginTop = '0.5rem';
+    reply.style.padding = '0.5rem';
+    reply.style.background = '#f0f0f0';
+    reply.style.borderRadius = '4px';
+    reply.innerHTML = `<strong>${replyName}:</strong> <span>${replyContent}</span><div style='font-size:0.8rem; color:#666;'>${timestamp}</div>`;
+
+    repliesContainer.appendChild(reply);
+    quillReply.setContents([]);
+    replyNameInput.value = '';
+  }
+});
     }
   });
 </script>
