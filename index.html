@@ -95,7 +95,7 @@
       <section id="post-box">
   <h2>📝 Create a Post</h2>
   <form id="postForm">
-    <label for="postName">Your Name (optional):</label><br>
+    <label for="postName">Your Name:</label><br>
 <input type="text" id="postName" name="postName" placeholder="Anonymous" style="width:100%; padding:0.5rem; font-family:inherit;"><br><br>
 <label for="postTitle">Title:</label><br>
     <input type="text" id="postTitle" name="postTitle" style="width:100%; padding:0.5rem; font-family:inherit;"><br><br>
@@ -172,11 +172,16 @@
       postList.prepend(contentElement);
       postList.prepend(titleElement);
 
+      // Save to localStorage
+      const existingPosts = JSON.parse(localStorage.getItem('forumPosts') || '[]');
+      existingPosts.push(post);
+      localStorage.setItem('forumPosts', JSON.stringify(existingPosts));
+
       // Send post to GitHub
       fetch('/.netlify/functions/save-post', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, name, content })
+        body: JSON.stringify({ title: post.title, name: post.name, content: post.content })
       })
       .then(res => res.json())
       .then(data => console.log('GitHub response:', data))
@@ -215,7 +220,8 @@
     const content = quill.root.innerHTML;
 
     if (title && content) {
-      const postId = 'post-' + Date.now();
+      const post = { id: 'post-' + Date.now(), title, name, content, timestamp: new Date().toLocaleString(), replies: [] };
+      const postId = post.id;
 
       const titleElement = document.createElement('div');
       titleElement.style.padding = '0.5rem 1rem';
