@@ -12,7 +12,6 @@
             background-color: #f2f4f8;
             color: #1e1e1e;
         }
-
         nav {
             display: flex;
             justify-content: space-between;
@@ -22,19 +21,16 @@
             font-weight: bold;
             font-size: 1rem;
         }
-
         header {
             text-align: center;
             padding: 2rem 1rem 0;
         }
-
         .hero-image {
             max-width: 100%;
             height: auto;
             border-radius: 12px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
-
         main {
             max-width: 880px;
             margin: 2rem auto;
@@ -43,16 +39,13 @@
             border-radius: 12px;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
         }
-
         .intro {
             font-size: 1rem;
             line-height: 1.8;
         }
-
         .intro p {
             margin-bottom: 1.4rem;
         }
-
         .intro code {
             background-color: #eef2f6;
             padding: 0.2rem 0.5rem;
@@ -60,272 +53,164 @@
             font-size: 0.95rem;
             color: #2b2b2b;
         }
-
         a {
             color: #0055cc;
             text-decoration: none;
         }
-
         a:hover {
             text-decoration: underline;
         }
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code&display=swap" rel="stylesheet">
-<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
-<!-- Quill Emoji Plugin -->
-<link href="https://cdn.jsdelivr.net/npm/quill-emoji@0.1.7/dist/quill-emoji.css" rel="stylesheet" />
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/quill-emoji@0.1.7/dist/quill-emoji.css" rel="stylesheet" />
 </head>
 <body>
-    <nav>
-        <div><a href="members.html">Members</a></div>
-        <div>Science doesn’t guess. It reveals</div>
-    </nav>
-
-    <header>
-        <img src="bb.png" alt="Forensic Digital Banner" class="hero-image">
-    </header>
-
-    <main>
-        <section class="intro">
-            <p><strong><code>Hello, Enthusiast 👋</code></strong></p>
-            <p>Welcome to <strong><code>Forensec.me</code></strong> — a space crafted with precision, built at the intersection of <code>forensic science</code>, <code>cybersecurity</code>, and <code>bioinformatics</code>.</p>
-            <p>Here, we explore how <code>genetics</code> meets <code>code</code>, and how logic solves real-world mysteries with clarity and evidence.</p>
-            <p>If you're a student, a researcher, or just plain curious — you belong here. You're part of a mission rooted in <code>science</code>, <code>ethics</code>, and <code>innovation</code>.</p>
-            <p><code>DNA reveals truth.</code> <br><code>Code uncovers patterns.</code><br>
-            At <a href="#"><code>Forensec</code></a>, we follow both.</p>
-        </section>
-      <section id="post-box">
-  <h2>📝 Create a Post</h2>
-  <form id="postForm">
-    <label for="postName">Your Name:</label><br>
-<input type="text" id="postName" name="postName" placeholder="Anonymous" style="width:100%; padding:0.5rem; font-family:inherit;"><br><br>
-<label for="postTitle">Title:</label><br>
-    <input type="text" id="postTitle" name="postTitle" style="width:100%; padding:0.5rem; font-family:inherit;"><br><br>
-
-    <label for="postContent">Content:</label><br>
-    <div id="editor" style="height: 200px;"></div><br><br>
-
-    <button type="submit" style="padding:0.5rem 1rem; font-family:inherit; cursor:pointer;">Post</button>
-  </form>
-
-  <div id="posts" style="margin-top:2rem;">
-    <h3>📚 Posts</h3>
-    <div id="postList"></div>
-  </div>
-</section>
-<script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
-<!-- Quill Emoji Plugin -->
-<script src="https://cdn.jsdelivr.net/npm/quill-emoji@0.1.7/dist/quill-emoji.min.js"></script>
-<script>
-  const quill = new Quill('#editor', {
-    theme: 'snow',
-    placeholder: 'Write your post...',
-    modules: {
-      toolbar: [['bold', 'italic', 'underline'], [{ list: 'bullet' }], ['emoji'], ['clean']],
-      emoji: true
-    }
-  });
-
-  const postForm = document.getElementById('postForm');
-  const postList = document.getElementById('postList');
-
-  document.addEventListener('DOMContentLoaded', () => {
-    const savedPosts = JSON.parse(localStorage.getItem('forumPosts') || '[]');
-    savedPosts.forEach(post => {
-      const postId = post.id;
-
-      const titleElement = document.createElement('div');
-      titleElement.style.padding = '0.5rem 1rem';
-      titleElement.style.border = '1px solid #aaa';
-      titleElement.style.marginBottom = '0.5rem';
-      titleElement.style.cursor = 'pointer';
-      titleElement.style.background = '#f9f9f9';
-      titleElement.textContent = post.title;
-      titleElement.setAttribute('data-target', postId);
-
-      const contentElement = document.createElement('div');
-      contentElement.id = postId;
-      contentElement.style.display = 'none';
-      contentElement.style.border = '1px solid #ccc';
-      contentElement.style.padding = '1rem';
-      contentElement.style.marginBottom = '1rem';
-      contentElement.innerHTML = `
-        <h4>${post.title} <span style='font-size:0.9rem; color:#555;'>(by ${post.name})</span></h4>
-        <div>${post.content}</div>
-        <div style='margin-top:1rem;'>
-          <input type="text" class="reply-name" placeholder="Your name" style="width:100%; margin-bottom:0.5rem; font-family:inherit; padding:0.5rem;">
-          <div class="reply-editor" style="height:100px; margin-bottom:0.5rem;"></div>
-          <button class='reply-btn' style='margin-top:0.5rem;'>Submit Reply</button>
-          <div class='replies' style='margin-top:1rem;'></div>
-        </div>`;
-
-      titleElement.addEventListener('click', function() {
-        const target = document.getElementById(postId);
-        target.style.display = target.style.display === 'none' ? 'block' : 'none';
-      });
-
-      postList.prepend(contentElement);
-      postList.prepend(titleElement);
-
-      const replyEditor = contentElement.querySelector('.reply-editor');
-      const replyNameInput = contentElement.querySelector('.reply-name');
-      const quillReply = new Quill(replyEditor, {
+<nav>
+    <div><a href="members.html">Members</a></div>
+    <div>Science doesn’t guess. It reveals</div>
+</nav>
+<header>
+    <img src="bb.png" alt="Forensic Digital Banner" class="hero-image">
+</header>
+<main>
+    <section class="intro">
+        <p><strong><code>Hello, Enthusiast 👋</code></strong></p>
+        <p>Welcome to <strong><code>Forensec.me</code></strong> — a space crafted with precision, built at the intersection of <code>forensic science</code>, <code>cybersecurity</code>, and <code>bioinformatics</code>.</p>
+        <p>Here, we explore how <code>genetics</code> meets <code>code</code>, and how logic solves real-world mysteries with clarity and evidence.</p>
+        <p>If you're a student, a researcher, or just plain curious — you belong here. You're part of a mission rooted in <code>science</code>, <code>ethics</code>, and <code>innovation</code>.</p>
+        <p><code>DNA reveals truth.</code> <br><code>Code uncovers patterns.</code><br>
+        At <a href="#"><code>Forensec</code></a>, we follow both.</p>
+    </section>
+    <section id="post-box">
+        <h2>📝 Create a Post</h2>
+        <form id="postForm">
+            <label for="postName">Your Name:</label><br>
+            <input type="text" id="postName" name="postName" placeholder="Anonymous" style="width:100%; padding:0.5rem; font-family:inherit;"><br><br>
+            <label for="postTitle">Title:</label><br>
+            <input type="text" id="postTitle" name="postTitle" style="width:100%; padding:0.5rem; font-family:inherit;"><br><br>
+            <label for="postContent">Content:</label><br>
+            <div id="editor" style="height: 200px;"></div><br><br>
+            <button type="submit" style="padding:0.5rem 1rem; font-family:inherit; cursor:pointer;">Post</button>
+        </form>
+        <div id="posts" style="margin-top:2rem;">
+            <h3>📚 Posts</h3>
+            <div id="postList"></div>
+        </div>
+    </section>
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/quill-emoji@0.1.7/dist/quill-emoji.min.js"></script>
+    <script>
+      const quill = new Quill('#editor', {
         theme: 'snow',
-        placeholder: 'Write your reply...',
+        placeholder: 'Write your post...',
         modules: {
           toolbar: [['bold', 'italic', 'underline'], [{ list: 'bullet' }], ['emoji'], ['clean']],
           emoji: true
         }
       });
 
-      contentElement.querySelector('.reply-btn').addEventListener('click', function() {
-        const replyContent = quillReply.root.innerHTML.trim();
-        const replyName = replyNameInput.value.trim();
-        const timestamp = new Date().toLocaleString();
-        const repliesContainer = contentElement.querySelector('.replies');
+      const postForm = document.getElementById('postForm');
+      const postList = document.getElementById('postList');
 
-        if (!replyName) {
-          alert('Reply name is required.');
+      document.addEventListener('DOMContentLoaded', () => {
+        const savedPosts = JSON.parse(localStorage.getItem('forumPosts') || '[]');
+        savedPosts.forEach(post => {
+          displayPost(post);
+        });
+      });
+
+      function displayPost(post) {
+        const postId = post.id;
+
+        const titleElement = document.createElement('div');
+        titleElement.style.padding = '0.5rem 1rem';
+        titleElement.style.border = '1px solid #aaa';
+        titleElement.style.marginBottom = '0.5rem';
+        titleElement.style.cursor = 'pointer';
+        titleElement.style.background = '#f9f9f9';
+        titleElement.textContent = post.title;
+        titleElement.setAttribute('data-target', postId);
+
+        const contentElement = document.createElement('div');
+        contentElement.id = postId;
+        contentElement.style.display = 'none';
+        contentElement.style.border = '1px solid #ccc';
+        contentElement.style.padding = '1rem';
+        contentElement.style.marginBottom = '1rem';
+        contentElement.innerHTML = `
+          <h4>${post.title} <span style='font-size:0.9rem; color:#555;'>(by ${post.name})</span></h4>
+          <div>${post.content}</div>
+          <div style='margin-top:1rem;'>
+            <input type="text" class="reply-name" placeholder="Your name" style="width:100%; margin-bottom:0.5rem; font-family:inherit; padding:0.5rem;">
+            <div class="reply-editor" style="height:100px; margin-bottom:0.5rem;"></div>
+            <button class='reply-btn' style='margin-top:0.5rem;'>Submit Reply</button>
+            <div class='replies' style='margin-top:1rem;'></div>
+          </div>`;
+
+        titleElement.addEventListener('click', function() {
+          const target = document.getElementById(postId);
+          target.style.display = target.style.display === 'none' ? 'block' : 'none';
+        });
+
+        postList.prepend(contentElement);
+        postList.prepend(titleElement);
+
+        const replyEditor = contentElement.querySelector('.reply-editor');
+        const replyNameInput = contentElement.querySelector('.reply-name');
+        const quillReply = new Quill(replyEditor, {
+          theme: 'snow',
+          placeholder: 'Write your reply...',
+          modules: {
+            toolbar: [['bold', 'italic', 'underline'], [{ list: 'bullet' }], ['emoji'], ['clean']],
+            emoji: true
+          }
+        });
+
+        contentElement.querySelector('.reply-btn').addEventListener('click', function() {
+          const replyContent = quillReply.root.innerHTML.trim();
+          const replyName = replyNameInput.value.trim();
+          const timestamp = new Date().toLocaleString();
+          const repliesContainer = contentElement.querySelector('.replies');
+
+          if (!replyName) {
+            alert('Reply name is required.');
+            return;
+          }
+          if (replyContent && replyContent !== '<p><br></p>') {
+            const reply = document.createElement('div');
+            reply.style.marginTop = '0.5rem';
+            reply.style.padding = '0.5rem';
+            reply.style.background = '#f0f0f0';
+            reply.style.borderRadius = '4px';
+            reply.innerHTML = `<strong>${replyName}:</strong> <span>${replyContent}</span><div style='font-size:0.8rem; color:#666;'>${timestamp}</div>`;
+            repliesContainer.appendChild(reply);
+            quillReply.setContents([]);
+            replyNameInput.value = '';
+          }
+        });
+      }
+
+      postForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const title = document.getElementById('postTitle').value;
+        const name = document.getElementById('postName').value;
+        if (!name.trim()) {
+          alert('Name is required.');
           return;
         }
-        if (replyContent && replyContent !== '<p><br></p>') {
-          const reply = document.createElement('div');
-          reply.style.marginTop = '0.5rem';
-          reply.style.padding = '0.5rem';
-          reply.style.background = '#f0f0f0';
-          reply.style.borderRadius = '4px';
-          reply.innerHTML = `<strong>${replyName}:</strong> <span>${replyContent}</span><div style='font-size:0.8rem; color:#666;'>${timestamp}</div>`;
-
-          repliesContainer.appendChild(reply);
-          quillReply.setContents([]);
-          replyNameInput.value = '';
+        const content = quill.root.innerHTML;
+        if (title && content) {
+          const post = { id: 'post-' + Date.now(), title, name, content, timestamp: new Date().toLocaleString(), replies: [] };
+          const existingPosts = JSON.parse(localStorage.getItem('forumPosts') || '[]');
+          existingPosts.push(post);
+          localStorage.setItem('forumPosts', JSON.stringify(existingPosts));
+          displayPost(post);
+          postForm.reset();
+          quill.setContents([]);
         }
       });
-    });
-  });
-      fetch('/.netlify/functions/save-post', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title: post.title, name: post.name, content: post.content })
-      })
-      .then(res => res.json())
-      .then(data => console.log('GitHub response:', data))
-      .catch(err => console.error('GitHub error:', err));
-
-      // Save post to localStorage
-      const existingPosts = JSON.parse(localStorage.getItem('forumPosts') || '[]');
-      existingPosts.push(post);
-      localStorage.setItem('forumPosts', JSON.stringify(existingPosts));
-
-      // Add reply logic
-      contentElement.querySelector('.reply-btn').addEventListener('click', () => {
-        const replyBox = contentElement.querySelector('.reply-box');
-        const replyContent = replyBox.value.trim();
-        const timestamp = new Date().toLocaleString();
-        const repliesContainer = contentElement.querySelector('.replies');
-
-        if (replyContent) {
-          const reply = document.createElement('div');
-          reply.style.marginTop = '0.5rem';
-          reply.style.padding = '0.5rem';
-          reply.style.background = '#f0f0f0';
-          reply.style.borderRadius = '4px';
-          reply.innerHTML = `<strong>${post.name}:</strong> <span>${replyContent}</span><div style='font-size:0.8rem; color:#666;'>${timestamp}</div>`;
-
-          repliesContainer.appendChild(reply);
-          replyBox.value = '';
-        }
-      });
-    });
-  });
-
-  postForm.addEventListener('submit', function(e) {
-    e.preventDefault();
-    const title = document.getElementById('postTitle').value;
-    const name = document.getElementById('postName').value;
-    if (!name.trim()) {
-      alert('Name is required.');
-      return;
-    }
-    const content = quill.root.innerHTML;
-
-    if (title && content) {
-      const post = { id: 'post-' + Date.now(), title, name, content, timestamp: new Date().toLocaleString(), replies: [] };
-      const postId = post.id;
-
-      const titleElement = document.createElement('div');
-      titleElement.style.padding = '0.5rem 1rem';
-      titleElement.style.border = '1px solid #aaa';
-      titleElement.style.marginBottom = '0.5rem';
-      titleElement.style.cursor = 'pointer';
-      titleElement.style.background = '#f9f9f9';
-      titleElement.textContent = title;
-      titleElement.setAttribute('data-target', postId);
-
-      const contentElement = document.createElement('div');
-      contentElement.id = postId;
-      contentElement.style.display = 'none';
-      contentElement.style.border = '1px solid #ccc';
-      contentElement.style.padding = '1rem';
-      contentElement.style.marginBottom = '1rem';
-      contentElement.innerHTML = `
-        <h4>${title} <span style='font-size:0.9rem; color:#555;'>(by ${name})</span></h4>
-        <div>${content}</div>
-        <div style='margin-top:1rem;'>
-          $1<input type="text" class="reply-name" placeholder="Your name" style="width:100%; margin-bottom:0.5rem; font-family:inherit; padding:0.5rem;"><div class="reply-editor" style="height:100px; margin-bottom:0.5rem;"></div>
-          <button class='reply-btn' style='margin-top:0.5rem;'>Submit Reply</button>
-          <div class='replies' style='margin-top:1rem;'></div>
-        </div>`;
-
-      titleElement.addEventListener('click', function() {
-        const target = document.getElementById(postId);
-        target.style.display = target.style.display === 'none' ? 'block' : 'none';
-      });
-
-      postList.prepend(contentElement);
-      postList.prepend(titleElement);
-
-      postForm.reset();
-      quill.setContents([]);
-
-      // Add reply logic
-      const replyEditor = contentElement.querySelector('.reply-editor');
-const replyNameInput = contentElement.querySelector('.reply-name');
-const quillReply = new Quill(replyEditor, {
-  theme: 'snow',
-  placeholder: 'Write your reply...',
-  modules: {
-    toolbar: [['bold', 'italic', 'underline'], [{ list: 'bullet' }], ['emoji'], ['clean']],
-    emoji: true
-  }
-});
-
-contentElement.querySelector('.reply-btn').addEventListener('click', function() {
-  const replyContent = quillReply.root.innerHTML.trim();
-  const replyName = replyNameInput.value.trim();
-  const timestamp = new Date().toLocaleString();
-  const repliesContainer = contentElement.querySelector('.replies');
-
-  if (!replyName) {
-    alert('Reply name is required.');
-    return;
-  }
-  if (replyContent && replyContent !== '<p><br></p>') {
-    const reply = document.createElement('div');
-    reply.style.marginTop = '0.5rem';
-    reply.style.padding = '0.5rem';
-    reply.style.background = '#f0f0f0';
-    reply.style.borderRadius = '4px';
-    reply.innerHTML = `<strong>${replyName}:</strong> <span>${replyContent}</span><div style='font-size:0.8rem; color:#666;'>${timestamp}</div>`;
-
-    repliesContainer.appendChild(reply);
-    quillReply.setContents([]);
-    replyNameInput.value = '';
-  }
-});
-    }
-  });
-</script>
+    </script>
 </main>
 </body>
 </html>
