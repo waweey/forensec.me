@@ -1,9 +1,10 @@
 const admin = require('firebase-admin');
 
-// Only initialize once
-if (!admin.apps.length) {
-  const serviceAccount = require('./service-account.json');
+// 🔐 Parse the service account from Netlify environment variable
+const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_JSON);
 
+// 🛡️ Initialize Firebase Admin if not already initialized
+if (!admin.apps.length) {
   admin.initializeApp({
     credential: admin.credential.cert(serviceAccount)
   });
