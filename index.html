@@ -1,187 +1,165 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Forensec.me</title>
-  <link href="https://fonts.googleapis.com/css2?family=Fira+Code&display=swap" rel="stylesheet">
-  <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
-  
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Forensec</title>
+  <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet" />
   <style>
     body {
+      font-family: Arial, sans-serif;
       margin: 0;
-      padding: 0;
-      font-family: 'Fira Code', monospace;
-      background-color: #f2f4f8;
-      color: #1e1e1e;
+      padding: 1rem;
+      background-color: #f5f5f5;
+      color: #333;
     }
-    nav {
-      display: flex;
-      justify-content: space-between;
-      padding: 1rem 2rem;
-      background-color: #fff;
-      border-bottom: 1px solid #ddd;
-      font-weight: bold;
-      font-size: 1rem;
+    .container {
+      max-width: 800px;
+      margin: auto;
     }
-    header {
-      text-align: center;
-      padding: 2rem 1rem 0;
+    .editor-container, .reply-container {
+      background: white;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
-    .hero-image {
-      max-width: 100%;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    .post, .reply {
+      background: #fff;
+      padding: 1rem;
+      border-radius: 6px;
+      margin-bottom: 1rem;
+      border-left: 4px solid #007BFF;
     }
-    main {
-      max-width: 880px;
-      margin: 2rem auto;
-      padding: 2rem;
-      background-color: #fff;
-      border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    }
-    .intro code {
-      background-color: #eef2f6;
-      padding: 0.2rem 0.5rem;
-      border-radius: 4px;
-    }
-    a {
-      color: #0055cc;
-      text-decoration: none;
-    }
-    a:hover {
-      text-decoration: underline;
+    .post h3, .reply h4 {
+      margin: 0 0 0.5rem;
     }
   </style>
 </head>
 <body>
-  <nav>
-    <div><a href="members.html">Members</a></div>
-    <div>Science doesn’t guess. It reveals</div>
-  </nav>
-  <header>
-    <img src="bb.png" alt="Forensic Digital Banner" class="hero-image">
-  </header>
-  <main>
-    <section class="intro">
-  <p><strong><code>Hello, Enthusiast 👋</code></strong></p>
-  <p>Welcome to <strong><code>Forensec.me</code></strong> — a space crafted with precision, built at the intersection of <code>forensic science</code>, <code>cybersecurity</code>, and <code>bioinformatics</code>.</p>
-  <p>Here, we explore how <code>genetics</code> meets <code>code</code>, and how logic solves real-world mysteries with clarity and evidence.</p>
-  <p>If you're a student, a researcher, or just plain curious — you belong here. You're part of a mission rooted in <code>science</code>, <code>ethics</code>, and <code>innovation</code>.</p>
-  <p><code>DNA reveals truth.</code> <br><code>Code uncovers patterns.</code><br>
-  At <a href="#"><code>Forensec</code></a>, we follow both.</p>
-</section>
+  <div class="container">
+    <h1>Forensec Blog</h1>
+    <p>Welcome to Forensec.me — a space at the intersection of forensics, cybersecurity, and bioinformatics.<br>
+    In DNA, we find truth. In code, we find patterns. At Forensec, we follow both.</p>
 
-    <section id="post-box">
-      <h2>📝 Create a Post</h2>
-      <form id="postForm">
-        <label for="postName">Your Name:</label><br>
-        <input type="text" id="postName" placeholder="Anonymous" style="width:100%; padding:0.5rem;"><br><br>
-        <label for="postTitle">Title:</label><br>
-        <input type="text" id="postTitle" style="width:100%; padding:0.5rem;"><br><br>
-        <label for="postContent">Content:</label><br>
-        <div id="editor" style="height: 200px;"></div><br>
-        <button type="submit">Post</button>
-      </form>
-      <div id="postList" style="margin-top:2rem;"></div>
-    </section>
+    <div class="editor-container">
+      <input type="text" id="author" placeholder="Your name (required)" required />
+      <div id="editor"></div>
+      <button onclick="submitPost()">Post</button>
+    </div>
 
-    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
-    
-    <script>
-      const quill = new Quill('#editor', {
+    <div id="posts"></div>
+  </div>
+
+  <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+  <script>
+    const quill = new Quill('#editor', {
+      theme: 'snow',
+      modules: {
+        toolbar: [
+          ['bold', 'italic', 'underline'],
+          [{ list: 'ordered' }, { list: 'bullet' }],
+          ['link']
+        ]
+      }
+    });
+
+    const postsContainer = document.getElementById('posts');
+    const storageKey = 'forensec_posts';
+    const replyEditors = {};
+
+    function loadPosts() {
+      const saved = JSON.parse(localStorage.getItem(storageKey) || '[]');
+      postsContainer.innerHTML = '';
+      saved.forEach(post => {
+        const div = document.createElement('div');
+        div.className = 'post';
+        div.innerHTML = `<h3>${post.author}</h3>${post.content}<br><button onclick="replyToPost('${post.id}')">Reply</button><div id="replies-${post.id}"></div>`;
+        postsContainer.appendChild(div);
+
+        if (post.replies && post.replies.length > 0) {
+          const replyDiv = document.getElementById(`replies-${post.id}`);
+          post.replies.forEach(rep => {
+            const r = document.createElement('div');
+            r.className = 'reply';
+            r.innerHTML = `<h4>${rep.author}</h4>${rep.content}`;
+            replyDiv.appendChild(r);
+          });
+        }
+      });
+    }
+
+    function submitPost() {
+      const author = document.getElementById('author').value.trim();
+      const content = quill.root.innerHTML.trim();
+      if (!author || !content || content === '<p><br></p>') {
+        alert('Both name and content are required.');
+        return;
+      }
+      const posts = JSON.parse(localStorage.getItem(storageKey) || '[]');
+      posts.unshift({
+        id: Date.now(),
+        author,
+        content,
+        replies: []
+      });
+      localStorage.setItem(storageKey, JSON.stringify(posts));
+      quill.setText('');
+      document.getElementById('author').value = '';
+      loadPosts();
+    }
+
+    function replyToPost(postId) {
+      const container = document.getElementById(`replies-${postId}`);
+      const existing = container.querySelector('.reply-container');
+      if (existing) return;
+
+      const replyBox = document.createElement('div');
+      replyBox.className = 'reply-container';
+      replyBox.innerHTML = `
+        <input type="text" placeholder="Your name (required)" id="reply-author-${postId}" />
+        <div id="reply-editor-${postId}" style="margin-bottom:10px;"></div>
+        <button onclick="submitReply('${postId}')">Reply</button>
+      `;
+      container.appendChild(replyBox);
+
+      replyEditors[postId] = new Quill(`#reply-editor-${postId}`, {
         theme: 'snow',
         modules: {
-          toolbar: [['bold', 'italic', 'underline'], [{ list: 'bullet' }], ['clean']]
+          toolbar: [
+            ['bold', 'italic', 'underline'],
+            [{ list: 'ordered' }, { list: 'bullet' }],
+            ['link']
+          ]
         }
       });
+    }
 
-      const postForm = document.getElementById('postForm');
-      const postList = document.getElementById('postList');
+    function submitReply(postId) {
+      const replyAuthor = document.getElementById(`reply-author-${postId}`).value.trim();
+      const replyEditor = replyEditors[postId];
+      const replyContent = replyEditor.root.innerHTML.trim();
 
-      postForm.addEventListener('submit', e => {
-        e.preventDefault();
-        const name = document.getElementById('postName').value.trim();
-        const title = document.getElementById('postTitle').value.trim();
-        const content = quill.root.innerHTML.trim();
-
-        if (!name || !title || content === '<p><br></p>') {
-          alert('All fields are required.');
-          return;
-        }
-
-        const post = {
-          id: 'post-' + Date.now(),
-          name,
-          title,
-          content,
-          timestamp: new Date().toLocaleString()
-        };
-
-        const posts = JSON.parse(localStorage.getItem('forumPosts') || '[]');
-        posts.push(post);
-        localStorage.setItem('forumPosts', JSON.stringify(posts));
-
-        renderPost(post);
-        postForm.reset();
-        quill.setContents([]);
-      });
-
-      function renderPost(post) {
-        const container = document.createElement('div');
-        container.style.border = '1px solid #ccc';
-        container.style.padding = '1rem';
-        container.style.marginBottom = '1rem';
-        container.innerHTML = `
-          <h3>${post.title}</h3>
-          <p><em>by ${post.name} at ${post.timestamp}</em></p>
-          <div>${post.content}</div>
-          <hr>
-          <input type="text" class="reply-name" placeholder="Your name"><br>
-          <div class="reply-editor" style="height: 100px;"></div>
-          <button class="reply-btn">Reply</button>
-          <div class="replies"></div>
-        `;
-
-        const replyEditor = container.querySelector('.reply-editor');
-        const quillReply = new Quill(replyEditor, {
-          theme: 'snow',
-          modules: {
-            toolbar: [['bold', 'italic', 'underline'], [{ list: 'bullet' }], ['clean']]
-          }
-        });
-
-        const replyBtn = container.querySelector('.reply-btn');
-        const replyName = container.querySelector('.reply-name');
-        const replyBox = container.querySelector('.replies');
-
-        replyBtn.addEventListener('click', () => {
-          const name = replyName.value.trim();
-          const reply = quillReply.root.innerHTML.trim();
-
-          if (!name || reply === '<p><br></p>') {
-            alert('Reply and name are required.');
-            return;
-          }
-
-          const replyElement = document.createElement('div');
-          replyElement.innerHTML = `<strong>${name}:</strong> ${reply}`;
-          replyElement.style.marginTop = '0.5rem';
-          replyBox.appendChild(replyElement);
-
-          quillReply.setContents([]);
-          replyName.value = '';
-        });
-
-        postList.prepend(container);
+      if (!replyAuthor || !replyContent || replyContent === '<p><br></p>') {
+        alert('Both name and reply content are required.');
+        return;
       }
 
-      window.addEventListener('DOMContentLoaded', () => {
-        const posts = JSON.parse(localStorage.getItem('forumPosts') || '[]');
-        posts.forEach(renderPost);
-      });
-    </script>
-  </main>
+      const posts = JSON.parse(localStorage.getItem(storageKey) || '[]');
+      const targetPost = posts.find(p => p.id == postId);
+      if (targetPost) {
+        targetPost.replies = targetPost.replies || [];
+        targetPost.replies.push({
+          author: replyAuthor,
+          content: replyContent
+        });
+      }
+
+      localStorage.setItem(storageKey, JSON.stringify(posts));
+      loadPosts();
+    }
+
+    loadPosts();
+  </script>
 </body>
 </html>
