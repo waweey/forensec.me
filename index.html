@@ -136,18 +136,26 @@
       timestamp: new Date().toLocaleString()
     };
 
-    const posts = JSON.parse(localStorage.getItem('forumPosts') || '[]');
-    posts.push(post);
-    localStorage.setItem('forumPosts', JSON.stringify(posts));
-
-    renderPost(post);
-    postForm.reset();
-    quill.setContents([]);
-  });
-
-  window.addEventListener('DOMContentLoaded', () => {
-    const posts = JSON.parse(localStorage.getItem('forumPosts') || '[]');
-    posts.forEach(renderPost);
+    // Send to Netlify Function instead of localStorage
+    fetch('/.netlify/functions/savePost', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(post)
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          renderPost(data.post);
+          postForm.reset();
+          quill.setContents([]);
+        } else {
+          alert('Failed to save post.');
+        }
+      })
+      .catch(err => {
+        alert('Error saving post.');
+        console.error(err);
+      });
   });
 </script>
   </main>
