@@ -164,9 +164,16 @@
         container.className = 'post-card';
 
         const isOwner = post.email === currentUserEmail;
-        const timestamp = new Date(post.timestamp).toLocaleString('en-US', {
-          weekday: 'short', hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'short', year: 'numeric'
-        });
+        const timestamp = post.timestamp?.toDate
+          ? post.timestamp.toDate().toLocaleString('en-US', {
+              weekday: 'short',
+              hour: '2-digit',
+              minute: '2-digit',
+              day: 'numeric',
+              month: 'short',
+              year: 'numeric'
+            })
+          : 'Unknown time';
 
         const deleteButton = isOwner ? `<button class="delete-btn" onclick="deletePost('${post.id}')">🗑️</button>` : '';
         const badge = isOwner ? `<span class="badge-you">You</span>` : '';
@@ -214,7 +221,7 @@
         const name = document.getElementById('postName').value.trim();
         const title = document.getElementById('postTitle').value.trim();
         const content = quill.root.innerHTML.trim();
-        const timestamp = new Date().toISOString();
+        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
 
         const post = {
           name,
