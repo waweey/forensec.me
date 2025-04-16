@@ -221,14 +221,14 @@
         const name = document.getElementById('postName').value.trim();
         const title = document.getElementById('postTitle').value.trim();
         const content = quill.root.innerHTML.trim();
-        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+        const timestamp = firebase.firestore.FieldValue.serverTimestamp();
 
         const post = {
-          name,
-          title,
-          content,
-          timestamp
-        };
+  name,
+  title,
+  content,
+  timestamp
+};
 
         try {
           const res = await fetch("/.netlify/functions/savePost", {
