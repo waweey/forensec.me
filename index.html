@@ -8,6 +8,7 @@
   <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
   <script src="https://www.gstatic.com/firebasejs/10.10.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.10.0/firebase-auth-compat.js"></script>
   <script>
     const firebaseConfig = {
       apiKey: "AIzaSyBA7H1ipMWMGT-278CtyPt5mZJ-t8JihFA",
@@ -20,6 +21,7 @@
 
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
+    const auth = firebase.auth();
   </script>
   <style>
     body {
@@ -67,6 +69,17 @@
     a:hover {
       text-decoration: underline;
     }
+    #auth-controls {
+      text-align: right;
+      margin-bottom: 1rem;
+    }
+    .avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
   </style>
 </head>
 <body>
@@ -87,7 +100,12 @@
       At <a href="#"><code>Forensec</code></a>, we follow both.</p>
     </section>
 
-<section id="post-box">
+    <div id="auth-controls">
+      <button id="login-btn">Sign in with Google</button>
+      <button id="logout-btn" style="display:none">Sign out</button>
+    </div>
+
+<section id="post-box" style="display:none">
   <h2>📝 Create a Post</h2>
   <form id="postForm">
     <label for="postName">Your Name:</label><br>
@@ -118,6 +136,10 @@
   postList.id = 'postList';
   document.querySelector('main').appendChild(postList);
 
+  const loginBtn = document.getElementById('login-btn');
+  const logoutBtn = document.getElementById('logout-btn');
+  const postBox = document.getElementById('post-box');
+
   function renderPost(post) {
     const container = document.createElement('div');
     container.style.border = '1px solid #ccc';
@@ -126,7 +148,7 @@
     container.style.borderRadius = '8px';
     container.innerHTML = `
       <h3>${post.title}</h3>
-      <p><em>by ${post.name} at ${post.timestamp}</em></p>
+      <p><em><img class="avatar" src="${post.photoURL || ''}" alt="">${post.name} at ${post.timestamp}</em></p>
       <div>${post.content}</div>
     `;
     postList.prepend(container);
@@ -143,11 +165,13 @@
       return;
     }
 
+    const user = auth.currentUser;
     const post = {
       name,
       title,
       content,
-      timestamp: new Date().toLocaleString()
+      timestamp: new Date().toLocaleString(),
+      photoURL: user ? user.photoURL : ''
     };
 
     try {
@@ -161,13 +185,33 @@
     }
   });
 
-  // Load all posts from Firestore on page load
   window.addEventListener('DOMContentLoaded', async () => {
     try {
       const snapshot = await db.collection('posts').orderBy('timestamp', 'desc').get();
       snapshot.forEach(doc => renderPost(doc.data()));
     } catch (error) {
       console.error('Error loading posts:', error);
+    }
+  });
+
+  loginBtn.addEventListener('click', () => {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    auth.signInWithPopup(provider);
+  });
+
+  logoutBtn.addEventListener('click', () => {
+    auth.signOut();
+  });
+
+  auth.onAuthStateChanged(user => {
+    if (user) {
+      postBox.style.display = 'block';
+      loginBtn.style.display = 'none';
+      logoutBtn.style.display = 'inline-block';
+    } else {
+      postBox.style.display = 'none';
+      loginBtn.style.display = 'inline-block';
+      logoutBtn.style.display = 'none';
     }
   });
 </script>
