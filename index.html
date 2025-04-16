@@ -186,44 +186,36 @@
     const name = document.getElementById('postName').value.trim();
     const title = document.getElementById('postTitle').value.trim();
     const content = quill.root.innerHTML.trim();
+    const timestamp = new Date().toLocaleString();
 
-    if (!name || !title || content === '<p><br></p>') {
-      alert('All fields are required.');
-      return;
-    }
-
-    const user = auth.currentUser;
     const post = {
       name,
       title,
       content,
-      timestamp: new Date().toLocaleString(),
-      photoURL: user ? user.photoURL : '',
-      email: user.email
+      timestamp
     };
 
     try {
-      const docRef = await db.collection('posts').add(post);
-      post.id = docRef.id;
-      renderPost(post);
-      postForm.reset();
-      quill.setContents([]);
-    } catch (error) {
-      console.error('Error saving post:', error);
-      alert('Failed to save post.');
-    }
-  });
-
-  window.addEventListener('DOMContentLoaded', async () => {
-    try {
-      const snapshot = await db.collection('posts').orderBy('timestamp', 'desc').get();
-      snapshot.forEach(doc => {
-        const data = doc.data();
-        data.id = doc.id;
-        renderPost(data);
+      const res = await fetch("/.netlify/functions/savePost", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(post)
       });
-    } catch (error) {
-      console.error('Error loading posts:', error);
+
+      const data = await res.json();
+
+      if (data.success) {
+        alert("✅ Post saved!");
+        location.reload();
+      } else {
+        alert("❌ Failed to save.");
+        console.error(data.error);
+      }
+    } catch (err) {
+      alert("❌ Error occurred.");
+      console.error(err);
     }
   });
 
