@@ -149,13 +149,6 @@
     const posts = JSON.parse(localStorage.getItem('forumPosts') || '[]');
     posts.forEach(renderPost);
   });
-  const quill = new Quill('#editor', {
-    theme: 'snow',
-    placeholder: 'Write your post...',
-    modules: {
-      toolbar: [['bold', 'italic', 'underline'], [{ list: 'bullet' }], ['clean']]
-    }
-  });
 </script>
   </main>
 </body>
