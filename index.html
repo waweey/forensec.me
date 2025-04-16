@@ -6,6 +6,21 @@
   <title>Forensec.me</title>
   <link href="https://fonts.googleapis.com/css2?family=Fira+Code&display=swap" rel="stylesheet">
   <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/10.10.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBA7H1ipMWMGT-278CtyPt5mZJ-t8JihFA",
+      authDomain: "forensec-blog.firebaseapp.com",
+      projectId: "forensec-blog",
+      storageBucket: "forensec-blog.appspot.com",
+      messagingSenderId: "619963771895",
+      appId: "1:619963771895:web:22916cf3a6d1473cc8dcf2"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+  </script>
   <style>
     body {
       margin: 0;
@@ -117,7 +132,7 @@
     postList.prepend(container);
   }
 
-  postForm.addEventListener('submit', e => {
+  postForm.addEventListener('submit', async e => {
     e.preventDefault();
     const name = document.getElementById('postName').value.trim();
     const title = document.getElementById('postTitle').value.trim();
@@ -129,33 +144,31 @@
     }
 
     const post = {
-      id: 'post-' + Date.now(),
       name,
       title,
       content,
       timestamp: new Date().toLocaleString()
     };
 
-    // Send to Netlify Function instead of localStorage
-    fetch('/.netlify/functions/savePost', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(post)
-    })
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) {
-          renderPost(data.post);
-          postForm.reset();
-          quill.setContents([]);
-        } else {
-          alert('Failed to save post.');
-        }
-      })
-      .catch(err => {
-        alert('Error saving post.');
-        console.error(err);
-      });
+    try {
+      await db.collection('posts').add(post);
+      renderPost(post);
+      postForm.reset();
+      quill.setContents([]);
+    } catch (error) {
+      console.error('Error saving post:', error);
+      alert('Failed to save post.');
+    }
+  });
+
+  // Load all posts from Firestore on page load
+  window.addEventListener('DOMContentLoaded', async () => {
+    try {
+      const snapshot = await db.collection('posts').orderBy('timestamp', 'desc').get();
+      snapshot.forEach(doc => renderPost(doc.data()));
+    } catch (error) {
+      console.error('Error loading posts:', error);
+    }
   });
 </script>
   </main>
