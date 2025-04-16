@@ -172,6 +172,19 @@
     postList.prepend(container);
   }
 
+  async function loadPosts() {
+    try {
+      const snapshot = await db.collection('posts').orderBy('timestamp', 'desc').get();
+      snapshot.forEach(doc => {
+        const post = doc.data();
+        post.id = doc.id;
+        renderPost(post);
+      });
+    } catch (err) {
+      console.error("Error loading posts:", err);
+    }
+  }
+
   async function deletePost(postId) {
     try {
       await db.collection('posts').doc(postId).delete();
@@ -244,8 +257,8 @@
       loginBtn.style.display = 'inline-block';
       logoutBtn.style.display = 'none';
     }
+
+    // 🔥 Load posts every time auth state changes
+    loadPosts();
   });
 </script>
-  </main>
-</body>
-</html>
