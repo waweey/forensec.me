@@ -66,7 +66,6 @@
 
     const postsContainer = document.getElementById('posts');
     const storageKey = 'forensec_posts';
-    const replyEditors = {};
 
     function loadPosts() {
       const saved = JSON.parse(localStorage.getItem(storageKey) || '[]');
@@ -123,7 +122,7 @@
       `;
       container.appendChild(replyBox);
 
-      replyEditors[postId] = new Quill(`#reply-editor-${postId}`, {
+      new Quill(`#reply-editor-${postId}`, {
         theme: 'snow',
         modules: {
           toolbar: [
@@ -137,7 +136,7 @@
 
     function submitReply(postId) {
       const replyAuthor = document.getElementById(`reply-author-${postId}`).value.trim();
-      const replyEditor = replyEditors[postId];
+      const replyEditor = Quill.find(document.querySelector(`#reply-editor-${postId}`));
       const replyContent = replyEditor.root.innerHTML.trim();
 
       if (!replyAuthor || !replyContent || replyContent === '<p><br></p>') {
@@ -163,3 +162,4 @@
   </script>
 </body>
 </html>
+
