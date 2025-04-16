@@ -1,5 +1,15 @@
-const fs = require('fs');
-const path = require('path');
+const admin = require('firebase-admin');
+
+// Only initialize once
+if (!admin.apps.length) {
+  const serviceAccount = require('./service-account.json');
+
+  admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount)
+  });
+}
+
+const db = admin.firestore();
 
 exports.handler = async function (event, context) {
   if (event.httpMethod !== 'POST') {
@@ -9,30 +19,21 @@ exports.handler = async function (event, context) {
     };
   }
 
-  const post = JSON.parse(event.body);
-  const filePath = path.join(__dirname, '..', '..', 'posts.json');
-  let posts = [];
-
   try {
-    posts = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
-  } catch (err) {
-    console.error('Read error:', err);
-    posts = [];
-  }
+    const post = JSON.parse(event.body);
 
-  try {
-    posts.unshift(post);
-    fs.writeFileSync(filePath, JSON.stringify(posts, null, 2));
+    const docRef = await db.collection('posts').add(post);
+    post.id = docRef.id;
+
+    return {
+      statusCode: 200,
+      body: JSON.stringify({ success: true, post })
+    };
   } catch (err) {
-    console.error('Write error:', err);
+    console.error('Firestore write error:', err);
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: 'Could not write to posts.json' })
+      body: JSON.stringify({ error: 'Failed to write to Firestore' })
     };
   }
-
-  return {
-    statusCode: 200,
-    body: JSON.stringify({ success: true, post })
-  };
 };
