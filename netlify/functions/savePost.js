@@ -16,11 +16,20 @@ exports.handler = async function (event, context) {
   try {
     posts = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
   } catch (err) {
+    console.error('Read error:', err);
     posts = [];
   }
 
-  posts.unshift(post); // add new post to the top
-  fs.writeFileSync(filePath, JSON.stringify(posts, null, 2));
+  try {
+    posts.unshift(post);
+    fs.writeFileSync(filePath, JSON.stringify(posts, null, 2));
+  } catch (err) {
+    console.error('Write error:', err);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: 'Could not write to posts.json' })
+    };
+  }
 
   return {
     statusCode: 200,
