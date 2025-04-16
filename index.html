@@ -23,11 +23,9 @@
     const db = firebase.firestore();
     const auth = firebase.auth();
 
-    // Custom Google provider setup
     const provider = new firebase.auth.GoogleAuthProvider();
     provider.setCustomParameters({
-      prompt: 'select_account',
-      client_id: "619963771895-1ignr8riuuo3vu46var72g7aci5n4dcl.apps.googleusercontent.com"
+      prompt: 'select_account'
     });
   </script>
   <style>
